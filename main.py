@@ -12,7 +12,7 @@ socketio = SocketIO(app)
 #     return 'Hello, World!'
  
 rooms = {}
-
+print("Hi")
 def generate_unique_code(length):
     while True:
         code = ""
