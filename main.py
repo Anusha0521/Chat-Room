@@ -1,4 +1,4 @@
-from flask import Flask, render_template,request, session, redirect, url_for
+from flask import Flask, render_template, request, session, redirect, url_for
 from flask_socketio import join_room, leave_room, send, SocketIO
 import random
 from string import ascii_uppercase
@@ -7,12 +7,9 @@ app = Flask(__name__)
 app.config["SECRET_KEY"] = "hjhjsdahhds"
 socketio = SocketIO(app)
 
-# @app.route('/')
-# def index():
-#     return 'Hello, World!'
- 
 rooms = {}
 print("Hi")
+
 def generate_unique_code(length):
     while True:
         code = ""
@@ -50,7 +47,6 @@ def home():
         session["name"] = name
         return redirect(url_for("room"))
              
-
     return render_template("home.html")
 
 @app.route("/room")
@@ -86,13 +82,15 @@ def connect(auth):
         return
     
     join_room(room)
-    creator = rooms[room].get("creator")  # Get the creator of the room
-    if creator:
-        send({"name": creator, "message": f"{creator} is the creator of this room."}, to=room)  # Send message only to the joiners
+    
+    if name != rooms[room].get("creator"):  # Check if the user is not the creator
+        creator = rooms[room].get("creator")  # Get the creator of the room
+        if creator:
+            send({"name": "System", "message": f"{creator} is the creator of this room."}, to=room)  # Send message to the room
+    
     send({"name": name, "message": "has entered the room"}, to=room)
     rooms[room]["members"] += 1
     print(f"{name} joined room {room}")
-
 
 @socketio.on("disconnect")
 def disconnect():
@@ -109,4 +107,4 @@ def disconnect():
     print(f"{name} has left the room {room}")
 
 if __name__ == '__main__':
-    app.run(debug=True)
+    socketio.run(app, debug=True)
