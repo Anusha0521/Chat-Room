@@ -42,7 +42,7 @@ def home():
         room = code
         if create != False:
             room = generate_unique_code(4)
-            rooms[room] = {"members": 0, "messages": []}
+            rooms[room] = {"members": 0, "messages": [], "creator": name}  # Store the creator's name
         elif code not in rooms:
             return render_template("home.html", error="Room does not exist.", code=code, name=name)
         
@@ -86,9 +86,13 @@ def connect(auth):
         return
     
     join_room(room)
+    creator = rooms[room].get("creator")  # Get the creator of the room
+    if creator:
+        send({"name": creator, "message": f"{creator} is the creator of this room."}, to=room)  # Send message only to the joiners
     send({"name": name, "message": "has entered the room"}, to=room)
     rooms[room]["members"] += 1
     print(f"{name} joined room {room}")
+
 
 @socketio.on("disconnect")
 def disconnect():
